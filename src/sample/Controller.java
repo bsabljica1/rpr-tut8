@@ -1,95 +1,100 @@
 package sample;
+
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import java.io.File;
-import javafx.application.Platform;
-import javafx.scene.control.Button;
-import javafx.scene.input.TouchEvent;
 import javafx.stage.Stage;
+import java.io.File;
 import java.io.IOException;
-import java.util.ResourceBundle;
-import static javafx.scene.control.PopupControl.USE_COMPUTED_SIZE;
+import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
 
-public class Controller
-{
+public class Controller {
+    public static File file;
+    public Label input;
+    public Button searchBtn;
+    public Button stopSearchBtn;
+    public TextField searchText;
+    public ListView<String> foundFiles;
+    public Thread whileSearchThread;
 
-    public TextField podstring;
-    public Button trazi;
-    public ListView spisak;
-    public File direktorij;
-    public Button prekini;
-    private Thread nit1;
-    private ObservableList<String> lista;
-
-    public Controller()
-    {
-        direktorij = new File(System.getProperty("user.home"));
-        lista = FXCollections.observableArrayList();
+    public class Pretraga implements Runnable{
+        @Override
+        public void run() {
+            String fileName = searchText.getText();
+            displayAll(new File(System.getProperty("user.home")), fileName);
+        }
     }
 
-    @FXML
-    public void initialize()
-    {
-        spisak.setItems(lista);
-        prekini.setDisable(true);
-        trazi.setDisable(false);
-
-        spisak.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>()
-        {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
-            {
-                try
-                {
-                FXMLLoader loader = new FXMLLoader( getClass().getResource("slanje.fxml") );
-                Parent root = loader.load();
-                Stage prozor_za_slanje = new Stage();
-                prozor_za_slanje.setTitle("Prozor za slanje");
-                prozor_za_slanje.setScene(new Scene(root, 600, 400));
-                prozor_za_slanje.show();
+    private void displayAll(File file, String fileName) {
+        if(file.isDirectory()){
+            File[] files = file.listFiles();
+            if(files != null){
+                for(File f : files){
+                    displayAll(f, fileName);
                 }
-                catch (IOException e) {}
+            }
+        }
+        if(file.isFile()){
+            if( file.getName().contains( fileName ) ) {
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                Platform.runLater(() -> {
+                    foundFiles.getItems().add(file.getAbsolutePath());
+                } );
+            }
+        }
+        if(file.getAbsolutePath().equals("user.home")){
+            searchBtn.setDisable(false);
+        }
+    }
+
+    public void Prekini(ActionEvent actionEvent){
+        searchBtn.setDisable(false);
+        stopSearchBtn.setDisable(true);
+        whileSearchThread.stop();
+    }
+
+    public void initialize() {
+        stopSearchBtn.setDisable(true);
+        foundFiles.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("slanje.fxml"));
+                Parent root = null;
+                try {
+                    root = loader.load();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                Stage secondaryStage = new Stage();
+                secondaryStage.setTitle("Posalji datoteku");
+                secondaryStage.setResizable(false);
+                secondaryStage.setScene(new Scene(root, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE));
+                if(foundFiles.getSelectionModel().getSelectedItem() != null)
+                    file = new File(foundFiles.getSelectionModel().getSelectedItem());
+                secondaryStage.show();
             }
         });
     }
 
-    private void IzvrsavanjePretrage(String put, String pretrazeni)
-    {
-    }
-
-    public void Pretrazi(ActionEvent actionEvent)
-    {
-        trazi.setDisable(true);
-        prekini.setDisable(false);
-        lista.clear();
-        Pretrazivanje pretraga = new Pretrazivanje();
-        nit1= new Thread(pretraga);
-        nit1.start();
-    }
-
-    public void Prekini(ActionEvent actionEvent)
-    {
-        trazi.setDisable(false);
-        prekini.setDisable(true);
-        nit1.stop();
-    }
-
-    public class Pretrazivanje implements Runnable
-    {
-        @Override
-        public void run()
-        {
-            IzvrsavanjePretrage(direktorij.getAbsolutePath(), podstring.getText() );
-        }
+    public void Pretrazi(ActionEvent actionEvent){
+        searchBtn.setDisable(true);
+        stopSearchBtn.setDisable(false);
+        foundFiles.getSelectionModel().clearSelection();
+        foundFiles.getItems().clear();
+        Pretraga pretraga = new Pretraga();
+        whileSearchThread = new Thread(pretraga);
+        whileSearchThread.start();
     }
 }

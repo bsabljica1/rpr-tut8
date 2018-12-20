@@ -26,22 +26,22 @@
             <rowConstraints>
                 <RowConstraints valignment="CENTER" vgrow="ALWAYS" />
             </rowConstraints>
-            <Label fx:id="uzorak" prefHeight="29.0" prefWidth="79.0" text="Uzorak:" GridPane.columnIndex="0" GridPane.rowIndex="0">
+            <Label fx:id="input" prefHeight="29.0" prefWidth="79.0" text="Uzorak:" GridPane.columnIndex="0" GridPane.rowIndex="0">
             <padding>
                <Insets left="20.0" />
             </padding>
             <font>
                <Font name="System Bold" size="15.0" />
             </font></Label>
-            <Button fx:id="trazi" onAction="#Pretrazi" prefHeight="9.0" prefWidth="54.0" style="-fx-border-color: black;" text="Traži" GridPane.columnIndex="2" GridPane.rowIndex="0" />
-            <Button fx:id="prekini" onAction="#Prekini" prefHeight="23.0" prefWidth="70.0" style="-fx-border-color: black;" text="Prekini" GridPane.columnIndex="3" GridPane.rowIndex="0" />
-         <TextField GridPane.columnIndex="1" />
+            <Button fx:id="searchBtn" onAction="#Pretrazi" prefHeight="9.0" prefWidth="54.0" style="-fx-border-color: black;" text="Traži" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+            <Button fx:id="stopSearchBtn" onAction="#Prekini" prefHeight="23.0" prefWidth="70.0" style="-fx-border-color: black;" text="Prekini" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+         <TextField fx:id="searchText" onAction="#Pretrazi" GridPane.columnIndex="1" />
             <padding>
                 <Insets bottom="10" />
             </padding>
         </GridPane>
     </top>
     <center>
-        <ListView fx:id="spisak" style="-fx-border-color: black;" />
+        <ListView fx:id="foundFiles" style="-fx-border-color: black;" />
     </center>
 </BorderPane>
