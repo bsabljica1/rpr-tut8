@@ -55,7 +55,7 @@ public class Controller
                 Parent root = loader.load();
                 Stage prozor_za_slanje = new Stage();
                 prozor_za_slanje.setTitle("Prozor za slanje");
-                prozor_za_slanje.setScene(new Scene(root, 400, 400));
+                prozor_za_slanje.setScene(new Scene(root, 600, 400));
                 prozor_za_slanje.show();
                 }
                 catch (IOException e) {}
